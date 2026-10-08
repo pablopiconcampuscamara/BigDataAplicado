@@ -1,4 +1,5 @@
 services:
+
 # ============================================================
   # HDFS
   # ============================================================
@@ -7,19 +8,21 @@ services:
     image: apache/hadoop:3.4
     container_name: namenode
     hostname: namenode
-    command: >
-      bash -c "
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo '<configuration><property><name>fs.defaultFS</name><value>hdfs://namenode:9000</value></property></configuration>' > /opt/hadoop/etc/hadoop/core-site.xml
         if [ ! -d /opt/hadoop/dfs/name/current ]; then
-          hdfs namenode -format -force;
-        fi &&
+          hdfs namenode -format -force
+        fi
         hdfs namenode
-      "
     environment:
       - HADOOP_HOME=/opt/hadoop
       - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
     ports:
       - "9870:9870"   # NameNode Web UI
-      - "9000:9000"   # HDFS
+      - "9000:9000"   # HDFS RPC
     volumes:
       - namenode_data:/opt/hadoop/dfs/name
     networks:
@@ -29,7 +32,12 @@ services:
     image: apache/hadoop:3.4
     container_name: datanode
     hostname: datanode
-    command: hdfs datanode
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo '<configuration><property><name>fs.defaultFS</name><value>hdfs://namenode:9000</value></property></configuration>' > /opt/hadoop/etc/hadoop/core-site.xml
+        hdfs datanode
     environment:
       - HADOOP_HOME=/opt/hadoop
       - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
@@ -41,8 +49,7 @@ services:
       - datanode_data:/opt/hadoop/dfs/data
     networks:
       - bigdata
-
-
+      
   # ============================================================
   # SPARK
   # ============================================================
@@ -181,48 +188,32 @@ services:
   # ============================================================
 
   workspace:
-    image: continuumio/anaconda3:2024.10-1
+    image: continuumio/anaconda3:latest
     container_name: workspace
     hostname: workspace
-
     working_dir: /workspace
-
     command: >
       bash -c "
         pip install --no-cache-dir pyspark==3.4.2 kafka-python pymongo psycopg2-binary &&
-        jupyter notebook
-        --ip=0.0.0.0
-        --port=8888
-        --no-browser
-        --allow-root
-        --NotebookApp.token=''
-        --NotebookApp.password=''
+        jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --ServerApp.token='' --ServerApp.password=''
       "
-
     environment:
       HADOOP_NAMENODE_HOST: namenode
       HADOOP_NAMENODE_PORT: 9000
-
       SPARK_MASTER_URL: spark://spark-master:7077
-
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-
       MONGO_HOST: mongo
       MONGO_PORT: 27017
-
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: bigdata
       POSTGRES_USER: root
       POSTGRES_PASSWORD: rootpassword
-
     ports:
       - "8888:8888"
-
     volumes:
       - ./workspace:/workspace
       - jupyter_data:/root/.jupyter
-
     depends_on:
       - namenode
       - datanode
@@ -231,10 +222,8 @@ services:
       - kafka
       - mongo
       - postgres
-
     networks:
       - bigdata
-
 
 # ==============================================================
 # NETWORK
