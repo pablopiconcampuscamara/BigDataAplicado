@@ -267,4 +267,5 @@ volumes:
   kafka_data:
   mongo_data:
   postgres_data:
+  mysql_data:
   jupyter_data:
