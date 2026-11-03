@@ -182,6 +182,26 @@ services:
     networks:
       - bigdata
 
+# ============================================================
+  # MYSQL
+  # ============================================================
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    hostname: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bigdata
+      MYSQL_USER: rootuser
+      MYSQL_PASSWORD: userpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - bigdata
 
   # ============================================================
   # JUPYTER / ANACONDA WORKSPACE
