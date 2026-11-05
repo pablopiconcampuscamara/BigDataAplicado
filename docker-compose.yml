@@ -177,6 +177,44 @@ services:
     networks:
       - bigdata
 
+# ============================================================
+  # APACHE FLUME (STREAMING)
+  # ============================================================
+
+  flume:
+    image: apache/hadoop:3.4
+    container_name: flume
+    hostname: flume
+    command:
+      - /bin/bash
+      - -c
+      - |
+        mkdir -p /workspace/flume_configs /workspace/flume_ingest
+        if [ ! -d /opt/apache-flume-1.11.0-bin ]; then
+          curl -sSL https://dlcdn.apache.org/flume/1.11.0/apache-flume-1.11.0-bin.tar.gz | tar -xz -C /opt/
+          cp /opt/hadoop/share/hadoop/common/*.jar /opt/apache-flume-1.11.0-bin/lib/
+          cp /opt/hadoop/share/hadoop/common/lib/*.jar /opt/apache-flume-1.11.0-bin/lib/
+          cp /opt/hadoop/share/hadoop/hdfs/*.jar /opt/apache-flume-1.11.0-bin/lib/
+          cp /opt/hadoop/share/hadoop/hdfs/lib/*.jar /opt/apache-flume-1.11.0-bin/lib/
+        fi
+        export JAVA_OPTS="-Xms256m -Xmx512m"
+        export FLUME_JAVA_OPTS="-Xms256m -Xmx512m"
+        /opt/apache-flume-1.11.0-bin/bin/flume-ng agent \
+          --conf /workspace/flume_configs/ \
+          --conf-file /workspace/flume_configs/weblogs.conf \
+          --name agent \
+          -Dflume.root.logger=INFO,console
+    environment:
+      - HADOOP_HOME=/opt/hadoop
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    volumes:
+      - ./workspace:/workspace
+    depends_on:
+      - namenode
+      - datanode
+    networks:
+      - bigdata
+
   # ============================================================
   # JUPYTER / ANACONDA WORKSPACE
   # ============================================================

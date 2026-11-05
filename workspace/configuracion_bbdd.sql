@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS pedidos (
 );
 
 -- 3. Inserción masiva de 1000 clientes
-DELIMITER $$
-DROP PROCEDURE IF EXISTS PoblarClientes$$
+DELIMITER //
+DROP PROCEDURE IF EXISTS PoblarClientes//
 CREATE PROCEDURE PoblarClientes()
 BEGIN
     DECLARE i INT DEFAULT 1;
@@ -41,15 +41,15 @@ BEGIN
         );
         SET i = i + 1;
     END WHILE;
-END$$
+END//
 
-CALL PoblarClientes()$$
-DROP PROCEDURE IF EXISTS PoblarClientes$$
+CALL PoblarClientes()//
+DROP PROCEDURE IF EXISTS PoblarClientes//
 DELIMITER ;
 
 -- 4. Inserción masiva de 1000 pedidos
-DELIMITER $$
-DROP PROCEDURE IF EXISTS PoblarPedidos$$
+DELIMITER //
+DROP PROCEDURE IF EXISTS PoblarPedidos//
 CREATE PROCEDURE PoblarPedidos()
 BEGIN
     DECLARE j INT DEFAULT 1;
@@ -63,8 +63,8 @@ BEGIN
         );
         SET j = j + 1;
     END WHILE;
-END$$
+END//
 
-CALL PoblarPedidos()$$
-DROP PROCEDURE IF EXISTS PoblarPedidos$$
+CALL PoblarPedidos()//
+DROP PROCEDURE IF EXISTS PoblarPedidos//
 DELIMITER ;
