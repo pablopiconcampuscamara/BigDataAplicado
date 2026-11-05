@@ -12,16 +12,13 @@ docker exec -it mysql mysql -u sqoopuser -psqooppassword
 ---
 ## Paso A2: Ejecutar la Ingesta Batch a HDFS
 
-### Creado el script de python para la ingesta de archivos
----
+Sqoop no viene instalado en las imágenes de este Compose. Para esta ingesta se usa el script PySpark, ejecutado desde el contenedor `workspace`. `--packages` descarga y añade el driver JDBC de MySQL al classpath de Spark:
 
-### Acceder al bash del workspace
-hdfs dfs -ls /user/iabd_admin/ingesta/ventas
+```powershell
+docker compose exec -e HADOOP_USER_NAME=hadoop workspace spark-submit --packages com.mysql:mysql-connector-j:8.0.33 /workspace/ingesta_pedidos.py
+```
 
----
-### Usar spark-submit para ejecutar el script
-
-- spark-submit /workspace/ingesta_pedidos.py
+Se ejecuta como `hadoop` para poder escribir en el directorio HDFS creado para ese usuario. La URL JDBC usa `mysql:3306` (el nombre del servicio dentro de la red de Docker), no `localhost`. La base `ventas_db`, el usuario `sqoopuser` y las tablas deben estar creados antes de ejecutar el script.
 
 ## Paso A3: Verificación del destino en HDFS
 

@@ -1,10 +1,9 @@
 from pyspark.sql import SparkSession
 
 def main():
-    # Inicializar la sesión de Spark incluyendo el paquete JDBC de MySQL
+    # Inicializar la sesión de Spark
     spark = SparkSession.builder \
         .appName('Ingesta_MySQL_a_HDFS') \
-        .config("spark.jars.packages", "mysql:mysql-connector-java:8.0.28") \
         .getOrCreate()
 
     # Reducir verbosidad de los logs
