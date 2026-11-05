@@ -219,6 +219,7 @@ services:
       "
     environment:
       HADOOP_NAMENODE_HOST: namenode
+      JAVA_HOME: /opt/conda
       HADOOP_NAMENODE_PORT: 9000
       SPARK_MASTER_URL: spark://spark-master:7077
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
