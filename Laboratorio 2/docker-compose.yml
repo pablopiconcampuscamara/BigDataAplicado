@@ -1,38 +1,27 @@
 name: bigdata-lab
 
-x-hadoop: &hadoop
-  image: apache/hadoop:3.4.0
-  env_file: ./hadoop.env
-  networks: [lab]
-
 services:
-  # ---------------- HDFS ----------------
-  namenode:
-    <<: *hadoop
+  # ---------------- Hadoop pseudodistribuido ----------------
+  hadoop:
+    build: ./hadoop
+    image: bigdata-lab-hadoop:3.4.0
     container_name: namenode
-    hostname: namenode
+    hostname: hadoop-lab
+    env_file: ./hadoop.env
     user: root
-    command: ["hdfs", "namenode"]
+    command: ["/bin/bash", "/opt/start-hadoop.sh"]
     environment:
       ENSURE_NAMENODE_DIR: /data/namenode/current
     ports:
       - "9870:9870"   # NameNode Web UI
       - "8020:8020"   # HDFS RPC
+      - "9864:9864"   # DataNode Web UI
+      - "8088:8088"   # YARN ResourceManager Web UI
     volumes:
       - namenode-data:/data/namenode
-      - ./datos:/workspace
-
-  datanode:
-    <<: *hadoop
-    container_name: datanode
-    hostname: datanode
-    user: root
-    command: ["hdfs", "datanode"]
-    depends_on: [namenode]
-    ports:
-      - "9864:9864"   # DataNode Web UI
-    volumes:
       - datanode-data:/data/datanode
+      - ./datos:/workspace
+    networks: [lab]
 
   # ---------------- Spark (standalone) ----------------
   spark-master:
@@ -131,7 +120,7 @@ services:
     build: ./flume
     container_name: flume
     hostname: flume
-    depends_on: [namenode, datanode]
+    depends_on: [hadoop]
     command: ["flume-ng", "agent", "-n", "a1", "-c", "/opt/flume/conf", "-f", "/flume-conf/agent.conf", "-Dflume.root.logger=INFO,console"]
     ports:
       - "44444:44444"  # fuente netcat de ejemplo
@@ -144,7 +133,7 @@ services:
     build: ./workspace
     container_name: workspace
     hostname: workspace
-    depends_on: [namenode, spark-master, kafka, mongo, postgres, mysql]
+    depends_on: [hadoop, spark-master, kafka, mongo, postgres, mysql]
     ports:
       - "8888:8888"   # JupyterLab
       - "4040:4040"   # Spark UI (sesiones lanzadas desde el workspace)
