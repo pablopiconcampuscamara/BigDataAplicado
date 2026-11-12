@@ -1,0 +1,155 @@
+name: Practica_5075_Integridad_KDD
+
+services:
+  # ---------------- Hadoop pseudodistribuido ----------------
+  hadoop:
+    build: ./hadoop
+    image: bigdata-lab-hadoop:3.4.0
+    container_name: namenode
+    hostname: hadoop-lab
+    env_file: ./hadoop.env
+    user: root
+    command: ["/bin/bash", "/opt/start-hadoop.sh"]
+    environment:
+      ENSURE_NAMENODE_DIR: /data/namenode/current
+    ports:
+      - "9870:9870"   # NameNode Web UI
+      - "8020:8020"   # HDFS RPC
+      - "9864:9864"   # DataNode Web UI
+      - "8088:8088"   # YARN ResourceManager Web UI
+    volumes:
+      - namenode-data:/data/namenode
+      - datanode-data:/data/datanode
+      - ./datos:/workspace
+    networks: [lab]
+
+  # ---------------- Spark (standalone) ----------------
+  spark-master:
+    image: apache/spark:3.4.2
+    container_name: spark-master
+    hostname: spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master"]
+    ports:
+      - "8080:8080"   # Master Web UI
+      - "7077:7077"   # Spark master
+    volumes:
+      - ./datos:/workspace
+    networks: [lab]
+
+  spark-worker:
+    image: apache/spark:3.4.2
+    container_name: spark-worker
+    hostname: spark-worker
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    depends_on: [spark-master]
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./datos:/workspace
+    networks: [lab]
+
+  # ---------------- Kafka (KRaft, sin Zookeeper) ----------------
+  kafka:
+    image: apache/kafka:3.8.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "29092:29092"  # acceso desde tu PC
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks: [lab]
+
+  # ---------------- Bases de datos ----------------
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks: [lab]
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: lab
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [lab]
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: lab
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks: [lab]
+
+  # ---------------- Flume (sobre imagen Hadoop 3.4) ----------------
+  flume:
+    build: ./flume
+    container_name: flume
+    hostname: flume
+    depends_on: [hadoop]
+    command: ["flume-ng", "agent", "-n", "a1", "-c", "/opt/flume/conf", "-f", "/flume-conf/agent.conf", "-Dflume.root.logger=INFO,console"]
+    ports:
+      - "44444:44444"  # fuente netcat de ejemplo
+    volumes:
+      - ./flume/conf:/flume-conf
+    networks: [lab]
+
+  # ---------------- Workspace (Anaconda + JupyterLab) ----------------
+  workspace:
+    build: ./workspace
+    container_name: workspace
+    hostname: workspace
+    depends_on: [hadoop, spark-master, kafka, mongo, postgres, mysql]
+    ports:
+      - "8888:8888"   # JupyterLab
+      - "4040:4040"   # Spark UI (sesiones lanzadas desde el workspace)
+    volumes:
+      - ./notebooks:/opt/notebooks
+      - ./datos:/workspace
+      - ./scripts:/scripts:ro
+    networks: [lab]
+
+networks:
+  lab:
+
+volumes:
+  namenode-data:
+  datanode-data:
+  kafka-data:
+  mongo-data:
+  postgres-data:
+  mysql-data:
