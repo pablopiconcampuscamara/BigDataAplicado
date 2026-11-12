@@ -1,0 +1,6 @@
+2026-11-12 19:51:28,079 INFO Inicio de verificación del lote
+2026-11-12 19:51:28,080 INFO VALIDO: transacciones_tienda_norte.csv
+2026-11-12 19:51:28,080 WARNING RECHAZADO: transacciones_tienda_sur.csv (el hash no coincide)
+2026-11-12 19:51:28,080 INFO VALIDO: transacciones_tienda_este.csv
+2026-11-12 19:51:28,081 INFO Manifiesto de cuarentena guardado en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\quarantine_manifest.txt
+2026-11-12 19:51:28,081 INFO Fin de verificación del lote
