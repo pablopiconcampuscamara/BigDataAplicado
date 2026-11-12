@@ -1,5 +1,6 @@
 """Inspecciona los archivos aprobados antes de decidir cómo limpiarlos."""
 
+import json
 import logging
 from pathlib import Path
 
@@ -128,6 +129,125 @@ def validar_fechas_y_dominio(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.Data
     return validos, rechazados
 
 
+def detectar_outliers_importe(
+    datos: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # Detecta y aparta importes atípicos mediante el criterio IQR.
+    # IQR es el rango intercuartílico: Q3 menos Q1; marca valores muy alejados del centro.
+    q1 = datos["importe_eur"].quantile(0.25)
+    q3 = datos["importe_eur"].quantile(0.75)
+    iqr = q3 - q1
+    limite_inferior = q1 - 1.5 * iqr
+    limite_superior = q3 + 1.5 * iqr
+
+    mascara_outlier = (datos["importe_eur"] < limite_inferior) | (
+        datos["importe_eur"] > limite_superior
+    )
+    outliers = datos.loc[mascara_outlier].copy()
+    outliers["motivo_rechazo"] = "outlier de importe (criterio IQR)"
+    datos_sin_outliers = datos.loc[~mascara_outlier].copy()
+
+    print(
+        "\nCriterio IQR para importe_eur: "
+        f"límite inferior={limite_inferior:.2f}, "
+        f"límite superior={limite_superior:.2f}"
+    )
+    print(f"Importes atípicos apartados: {len(outliers)}")
+    if not outliers.empty:
+        print(outliers[["id_transaccion", "importe_eur"]].to_string(index=False))
+
+    logging.info(
+        "Criterio IQR de importes: Q1=%s, Q3=%s, IQR=%s, límites=(%s, %s)",
+        q1,
+        q3,
+        iqr,
+        limite_inferior,
+        limite_superior,
+    )
+    logging.warning("Importes atípicos apartados por IQR: %s", len(outliers))
+    return datos_sin_outliers, outliers
+
+
+def guardar_resultados(
+    datos_limpios: pd.DataFrame,
+    rechazados: pd.DataFrame,
+    proyecto: Path,
+) -> None:
+    """Guarda el dataset preparado y genera métricas."""
+    carpeta_procesados = proyecto / "processed"
+    carpeta_informes = proyecto / "reports"
+    carpeta_muestras = proyecto / "output_samples"
+    carpeta_procesados.mkdir(exist_ok=True)
+    carpeta_informes.mkdir(exist_ok=True)
+    carpeta_muestras.mkdir(exist_ok=True)
+
+    archivo_dataset = carpeta_procesados / "dataset_kdd_listo.csv"
+    datos_limpios.to_csv(archivo_dataset, index=False)
+
+    total_entrada = len(datos_limpios) + len(rechazados)
+    filas_completas = int(datos_limpios.notna().all(axis=1).sum())
+    tasa_completitud = filas_completas / len(datos_limpios) * 100 if len(datos_limpios) else 0
+    ids_unicos = int(datos_limpios["id_transaccion"].nunique())
+    tasa_unicidad = ids_unicos / len(datos_limpios) * 100 if len(datos_limpios) else 0
+
+    # La tasa de integridad compara los ficheros copiados a staging con el manifiesto.
+    manifiesto = proyecto / "datos_previos" / "raw_batch_202611" / "manifest_checksums.sha256"
+    total_archivos = sum(1 for linea in manifiesto.read_text(encoding="utf-8").splitlines() if linea.strip())
+    archivos_aceptados = len(list((proyecto / "staging" / "verified").glob("*.csv")))
+    archivos_rechazados = total_archivos - archivos_aceptados
+    tasa_integridad = archivos_aceptados / total_archivos * 100 if total_archivos else 0
+
+    importes = datos_limpios["importe_eur"]
+    outliers_importe = rechazados.loc[
+        rechazados["motivo_rechazo"].eq("outlier de importe (criterio IQR)"),
+        "importe_eur",
+    ]
+    importes_antes_de_apartar_outliers = pd.concat([importes, outliers_importe])
+    q1 = importes_antes_de_apartar_outliers.quantile(0.25)
+    q3 = importes_antes_de_apartar_outliers.quantile(0.75)
+    iqr = q3 - q1
+    metricas = {
+        "registros": {
+            "entrada": total_entrada,
+            "procesados": len(datos_limpios),
+            "rechazados": len(rechazados),
+        },
+        "calidad": {
+            "completitud_pct": round(tasa_completitud, 2),
+            "unicidad_id_pct": round(tasa_unicidad, 2),
+            "validez_registros_pct": round(
+                len(datos_limpios) / total_entrada * 100 if total_entrada else 0,
+                2,
+            ),
+        },
+        "integridad_criptografica": {
+            "archivos_total": total_archivos,
+            "archivos_validados": archivos_aceptados,
+            "archivos_rechazados": archivos_rechazados,
+            "tasa_validacion_pct": round(tasa_integridad, 2),
+        },
+        "importe_eur": {
+            "media": round(float(importes.mean()), 2),
+            "mediana": round(float(importes.median()), 2),
+            "desviacion_estandar": round(float(importes.std()), 2),
+            "percentil_25": round(float(importes.quantile(0.25)), 2),
+            "percentil_75": round(float(importes.quantile(0.75)), 2),
+            "limite_inferior_iqr": round(float(q1 - 1.5 * iqr), 2),
+            "limite_superior_iqr": round(float(q3 + 1.5 * iqr), 2),
+        },
+    }
+
+    archivo_metricas = carpeta_muestras / "metricas_perfilado.json"
+    archivo_metricas.write_text(
+        json.dumps(metricas, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    print(f"\nDataset KDD guardado en: {archivo_dataset}")
+    print(f"Métricas guardadas en: {archivo_metricas}")
+    logging.info("Dataset KDD guardado en %s", archivo_dataset)
+    logging.info("Métricas de perfilado guardadas en %s", archivo_metricas)
+
 if __name__ == "__main__":
     proyecto = Path(__file__).resolve().parents[1]
     carpeta_logs = proyecto / "logs"
@@ -145,16 +265,20 @@ if __name__ == "__main__":
     datos = cargar_lote(carpeta_entrada)
     datos_sin_nulos, rechazados_sin_id = tratar_nulos(datos)
     datos_limpios, rechazados_por_reglas = validar_fechas_y_dominio(datos_sin_nulos)
+    datos_limpios, outliers = detectar_outliers_importe(datos_limpios)
 
     # Escribimos todos los registros rechazados juntos, con su motivo correspondiente.
     archivo_rechazados = proyecto / "output_samples" / "bad_records.csv"
-    pd.concat([rechazados_sin_id, rechazados_por_reglas]).to_csv(
-        archivo_rechazados,
-        index=False,
+    todos_rechazados = pd.concat(
+        [rechazados_sin_id, rechazados_por_reglas, outliers],
+        ignore_index=True,
     )
+    todos_rechazados.to_csv(archivo_rechazados, index=False)
     print(f"Detalle de filas apartadas guardado en: {archivo_rechazados}")
+    print(f"Filas finales que continúan en el pipeline: {len(datos_limpios)}")
     logging.info(
         "Validación finalizada: %s filas listas para continuar",
         len(datos_limpios),
     )
     logging.info("Filas rechazadas guardadas en %s", archivo_rechazados)
+    guardar_resultados(datos_limpios, todos_rechazados, proyecto)
