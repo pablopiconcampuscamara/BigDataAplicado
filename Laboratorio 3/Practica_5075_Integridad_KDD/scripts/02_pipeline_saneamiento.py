@@ -37,7 +37,7 @@ def cargar_lote(carpeta_entrada: Path) -> pd.DataFrame:
     return datos
 
 
-def tratar_nulos(datos: pd.DataFrame, archivo_rechazados: Path) -> pd.DataFrame:
+def tratar_nulos(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Aparta filas sin identificador e imputa nulos de las demás columnas."""
     columnas_obligatorias = [
         "id_transaccion",
@@ -55,7 +55,6 @@ def tratar_nulos(datos: pd.DataFrame, archivo_rechazados: Path) -> pd.DataFrame:
     )
     rechazados = datos.loc[ids_vacios].copy()
     rechazados["motivo_rechazo"] = "id_transaccion nulo"
-    rechazados.to_csv(archivo_rechazados, index=False)
     logging.warning("Filas apartadas por id_transaccion nulo: %s", len(rechazados))
 
     # Las filas restantes se pueden conservar y completar según el tipo de dato.
@@ -80,11 +79,53 @@ def tratar_nulos(datos: pd.DataFrame, archivo_rechazados: Path) -> pd.DataFrame:
             logging.info("Nulos de %s imputados con la moda: %s", columna, valor_mas_frecuente)
 
     print(f"\nFilas apartadas por falta de identificador: {len(rechazados)}")
-    print(f"Detalle guardado en: {archivo_rechazados}")
     print(f"Filas conservadas tras tratar nulos: {len(limpios)}")
     print("\nNulos restantes:")
     print(limpios.isna().sum().to_string())
-    return limpios
+    return limpios, rechazados
+
+
+def validar_fechas_y_dominio(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Aparta fechas inválidas y valores fuera de las reglas de negocio."""
+    datos = datos.copy()
+    # errors="coerce" convierte fechas ilegibles en NaT para poder detectarlas.
+    fechas = pd.to_datetime(datos["timestamp"], errors="coerce")
+    importes = pd.to_numeric(datos["importe_eur"], errors="coerce")
+    unidades = pd.to_numeric(datos["unidades"], errors="coerce")
+
+    ahora = pd.Timestamp.now()
+    inicio_ano = pd.Timestamp(year=ahora.year, month=1, day=1)
+    reglas_invalidas = [
+        (fechas.isna(), "timestamp inválido"),
+        (fechas < inicio_ano, f"timestamp anterior al año {ahora.year}"),
+        (fechas > ahora, "timestamp futuro"),
+        (importes.isna(), "importe_eur no numérico"),
+        (importes <= 0, "importe_eur debe ser mayor que 0"),
+        (unidades.isna(), "unidades no numéricas"),
+        (unidades < 1, "unidades debe ser al menos 1"),
+    ]
+
+    # Una fila puede incumplir más de una regla; guardamos todos sus motivos.
+    motivos = pd.Series("", index=datos.index, dtype="string")
+    for mascara, motivo in reglas_invalidas:
+        motivos.loc[mascara] = motivos.loc[mascara].apply(
+            lambda anterior: f"{anterior}; {motivo}" if anterior else motivo
+        )
+
+    mascara_rechazo = motivos.ne("")
+    rechazados = datos.loc[mascara_rechazo].copy()
+    rechazados["motivo_rechazo"] = motivos.loc[mascara_rechazo]
+
+    validos = datos.loc[~mascara_rechazo].copy()
+    # Normalizamos el formato de fecha y los tipos numéricos tras validar.
+    validos["timestamp"] = fechas.loc[~mascara_rechazo].dt.strftime("%Y-%m-%d %H:%M:%S")
+    validos["importe_eur"] = importes.loc[~mascara_rechazo]
+    validos["unidades"] = unidades.loc[~mascara_rechazo]
+
+    print(f"\nFilas apartadas por fecha o dominio inválidos: {len(rechazados)}")
+    print(f"Filas válidas para continuar: {len(validos)}")
+    logging.warning("Filas apartadas por fecha o dominio inválidos: %s", len(rechazados))
+    return validos, rechazados
 
 
 if __name__ == "__main__":
@@ -102,10 +143,18 @@ if __name__ == "__main__":
     carpeta_entrada = proyecto / "staging" / "verified"
     logging.info("Inicio de inspección de datos")
     datos = cargar_lote(carpeta_entrada)
+    datos_sin_nulos, rechazados_sin_id = tratar_nulos(datos)
+    datos_limpios, rechazados_por_reglas = validar_fechas_y_dominio(datos_sin_nulos)
+
+    # Escribimos todos los registros rechazados juntos, con su motivo correspondiente.
     archivo_rechazados = proyecto / "output_samples" / "bad_records.csv"
-    datos_limpios = tratar_nulos(datos, archivo_rechazados)
+    pd.concat([rechazados_sin_id, rechazados_por_reglas]).to_csv(
+        archivo_rechazados,
+        index=False,
+    )
+    print(f"Detalle de filas apartadas guardado en: {archivo_rechazados}")
     logging.info(
-        "Tratamiento de nulos finalizado: %s filas listas para las siguientes validaciones",
+        "Validación finalizada: %s filas listas para continuar",
         len(datos_limpios),
     )
-    logging.info("Filas sin identificador guardadas en %s", archivo_rechazados)
+    logging.info("Filas rechazadas guardadas en %s", archivo_rechazados)
