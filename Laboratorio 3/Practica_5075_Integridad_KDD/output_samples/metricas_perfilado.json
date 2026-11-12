@@ -1,0 +1,27 @@
+{
+  "registros": {
+    "entrada": 100,
+    "procesados": 88,
+    "rechazados": 12
+  },
+  "calidad": {
+    "completitud_pct": 100.0,
+    "unicidad_id_pct": 100.0,
+    "validez_registros_pct": 88.0
+  },
+  "integridad_criptografica": {
+    "archivos_total": 3,
+    "archivos_validados": 2,
+    "archivos_rechazados": 1,
+    "tasa_validacion_pct": 66.67
+  },
+  "importe_eur": {
+    "media": 71.01,
+    "mediana": 73.22,
+    "desviacion_estandar": 26.19,
+    "percentil_25": 54.14,
+    "percentil_75": 84.94,
+    "limite_inferior_iqr": 7.72,
+    "limite_superior_iqr": 136.38
+  }
+}
