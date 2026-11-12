@@ -1,5 +1,3 @@
-"""Inspecciona los archivos aprobados antes de decidir cómo limpiarlos."""
-
 import json
 import logging
 from pathlib import Path
@@ -8,28 +6,30 @@ import pandas as pd
 
 
 def cargar_lote(carpeta_entrada: Path) -> pd.DataFrame:
-    """Lee los CSV verificados, los une y muestra su estructura y sus valores nulos."""
+    # Lee los CSV verificados, los une y muestra su estructura y sus valores nulos.
     archivos = sorted(carpeta_entrada.glob("*.csv"))
     if not archivos:
         raise FileNotFoundError(f"No hay archivos CSV verificados en {carpeta_entrada}")
 
     tablas = []
     for archivo in archivos:
-        # read_csv convierte cada archivo CSV en una tabla de pandas (DataFrame).
+        # read_csv convierte cada archivo CSV en una tabla de pandas
         tabla = pd.read_csv(archivo)
         tablas.append(tabla)
         mensaje = f"{archivo.name}: {len(tabla)} filas y {len(tabla.columns)} columnas"
         print(mensaje)
         logging.info(mensaje)
 
-    # Unimos las tiendas en una tabla; ignore_index crea una numeración continua de filas.
+    # Unimos las tiendas en una tabla
+    # ignore_index crea una numeración continua de filas.
     datos = pd.concat(tablas, ignore_index=True)
     print(f"\nLote conjunto: {len(datos)} filas y {len(datos.columns)} columnas")
     print("\nColumnas:")
     for columna in datos.columns:
         print(f"- {columna}")
 
-    # isna detecta celdas vacías; sum cuenta cuántas hay en cada columna.
+    # isna detecta celdas vacías
+    # sum cuenta cuántas hay en cada columna.
     nulos = datos.isna().sum()
     print("\nValores nulos por columna:")
     print(nulos.to_string())
@@ -39,7 +39,7 @@ def cargar_lote(carpeta_entrada: Path) -> pd.DataFrame:
 
 
 def tratar_nulos(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Aparta filas sin identificador e imputa nulos de las demás columnas."""
+    # Aparta filas sin identificador e imputa nulos de las demás columnas.
     columnas_obligatorias = [
         "id_transaccion",
         "timestamp",
@@ -87,7 +87,7 @@ def tratar_nulos(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def validar_fechas_y_dominio(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Aparta fechas inválidas y valores fuera de las reglas de negocio."""
+    # Aparta fechas inválidas y valores fuera de las reglas de negocio.
     datos = datos.copy()
     # errors="coerce" convierte fechas ilegibles en NaT para poder detectarlas.
     fechas = pd.to_datetime(datos["timestamp"], errors="coerce")
@@ -106,7 +106,7 @@ def validar_fechas_y_dominio(datos: pd.DataFrame) -> tuple[pd.DataFrame, pd.Data
         (unidades < 1, "unidades debe ser al menos 1"),
     ]
 
-    # Una fila puede incumplir más de una regla; guardamos todos sus motivos.
+    # Una fila puede incumplir más de una regla asi que guardamos todos los motivos.
     motivos = pd.Series("", index=datos.index, dtype="string")
     for mascara, motivo in reglas_invalidas:
         motivos.loc[mascara] = motivos.loc[mascara].apply(
@@ -133,7 +133,7 @@ def detectar_outliers_importe(
     datos: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Detecta y aparta importes atípicos mediante el criterio IQR.
-    # IQR es el rango intercuartílico: Q3 menos Q1; marca valores muy alejados del centro.
+    # IQR es el rango intercuartílico: Q3 menos Q1, marca valores muy alejados del centro.
     q1 = datos["importe_eur"].quantile(0.25)
     q3 = datos["importe_eur"].quantile(0.75)
     iqr = q3 - q1
@@ -173,7 +173,7 @@ def guardar_resultados(
     rechazados: pd.DataFrame,
     proyecto: Path,
 ) -> None:
-    """Guarda el dataset preparado y genera métricas."""
+    # Guarda el dataset preparado y genera métricas.
     carpeta_procesados = proyecto / "processed"
     carpeta_informes = proyecto / "reports"
     carpeta_muestras = proyecto / "output_samples"
@@ -190,7 +190,7 @@ def guardar_resultados(
     ids_unicos = int(datos_limpios["id_transaccion"].nunique())
     tasa_unicidad = ids_unicos / len(datos_limpios) * 100 if len(datos_limpios) else 0
 
-    # La tasa de integridad compara los ficheros copiados a staging con el manifiesto.
+    # La tasa de integridad compara los ficheros copiados a staging con el manifiesto. (2/3 | 66/67%)
     manifiesto = proyecto / "datos_previos" / "raw_batch_202611" / "manifest_checksums.sha256"
     total_archivos = sum(1 for linea in manifiesto.read_text(encoding="utf-8").splitlines() if linea.strip())
     archivos_aceptados = len(list((proyecto / "staging" / "verified").glob("*.csv")))
