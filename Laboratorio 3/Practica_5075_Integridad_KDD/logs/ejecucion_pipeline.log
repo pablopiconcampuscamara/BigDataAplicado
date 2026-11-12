@@ -73,3 +73,49 @@
 2026-11-12 20:18:58,192 WARNING Filas apartadas por fecha o dominio inválidos: 7
 2026-11-12 20:18:58,196 INFO Validación finalizada: 91 filas listas para continuar
 2026-11-12 20:18:58,196 INFO Filas rechazadas guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:23:06,538 INFO Inicio de inspección de datos
+2026-11-12 20:23:06,540 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:23:06,541 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:23:06,542 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:23:06,542 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:23:06,544 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:23:06,545 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:23:06,545 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:23:06,545 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:23:06,551 WARNING Filas apartadas por fecha o dominio inválidos: 7
+2026-11-12 20:23:06,556 INFO Criterio IQR de importes: Q1=55.965, Q3=88.13, IQR=32.16499999999999, límites=(7.717500000000015, 136.3775)
+2026-11-12 20:23:06,556 WARNING Importes atípicos apartados por IQR: 3
+2026-11-12 20:23:06,563 INFO Validación finalizada: 88 filas listas para continuar
+2026-11-12 20:23:06,563 INFO Filas rechazadas guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:24:00,209 INFO Inicio de inspección de datos
+2026-11-12 20:24:00,211 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:24:00,212 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:24:00,213 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:24:00,213 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:24:00,214 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:24:00,215 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:24:00,216 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:24:00,216 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:24:00,221 WARNING Filas apartadas por fecha o dominio inválidos: 7
+2026-11-12 20:24:00,224 INFO Criterio IQR de importes: Q1=55.965, Q3=88.13, IQR=32.16499999999999, límites=(7.717500000000015, 136.3775)
+2026-11-12 20:24:00,224 WARNING Importes atípicos apartados por IQR: 3
+2026-11-12 20:24:00,227 INFO Validación finalizada: 88 filas listas para continuar
+2026-11-12 20:24:00,227 INFO Filas rechazadas guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:24:00,236 INFO Dataset KDD guardado en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\processed\dataset_kdd_listo.csv
+2026-11-12 20:24:00,236 INFO Métricas de perfilado guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\metricas_perfilado.json
+2026-11-12 20:25:53,948 INFO Inicio de inspección de datos
+2026-11-12 20:25:53,950 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:25:53,951 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:25:53,952 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:25:53,952 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:25:53,953 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:25:53,954 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:25:53,954 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:25:53,955 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:25:53,961 WARNING Filas apartadas por fecha o dominio inválidos: 7
+2026-11-12 20:25:53,965 INFO Criterio IQR de importes: Q1=55.965, Q3=88.13, IQR=32.16499999999999, límites=(7.717500000000015, 136.3775)
+2026-11-12 20:25:53,965 WARNING Importes atípicos apartados por IQR: 3
+2026-11-12 20:25:53,974 INFO Validación finalizada: 88 filas listas para continuar
+2026-11-12 20:25:53,974 INFO Filas rechazadas guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:25:53,982 INFO Dataset KDD guardado en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\processed\dataset_kdd_listo.csv
+2026-11-12 20:25:53,982 INFO Métricas de perfilado guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\metricas_perfilado.json
