@@ -8,3 +8,6 @@ TXE-20261110-0022,Este_Valencia,2024-02-11 09:10:05,Hogar,31.23,4,Transferencia,
 TXE-20261110-0025,Este_Valencia,2026-11-10 13:32:18,Textil,57.52,0,Efectivo,unidades debe ser al menos 1
 TXE-20261110-0039,Este_Valencia,2026-99-99 INVALID_TS,Textil,70.79,5,Transferencia,timestamp inválido
 TXE-20261110-0042,Este_Valencia,2026-11-10 16:42:04,Textil,115.74,-3,Efectivo,unidades debe ser al menos 1
+TXE-20261110-0016,Este_Valencia,2026-11-10 12:02:54,Hogar,1480.0,1,Bizum,outlier de importe (criterio IQR)
+TXE-20261110-0032,Este_Valencia,2026-11-10 14:48:52,Hogar,2750.9,4,Transferencia,outlier de importe (criterio IQR)
+TXE-20261110-0047,Este_Valencia,2026-11-10 17:48:18,Hogar,4120.0,6,Efectivo,outlier de importe (criterio IQR)
