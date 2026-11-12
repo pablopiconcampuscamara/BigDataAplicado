@@ -47,11 +47,11 @@ Se crearon el directorio HDFS y se copió, listó y auditó el archivo con:
 
 ## 3. Análisis crítico
 
-En un clúster de producción, HDFS divide los archivos en bloques y guarda varias réplicas de cada bloque en distintos DataNodes, normalmente procurando distribuirlas entre racks [1]. Si un DataNode se apaga, el NameNode detecta que deja de responder mediante los heartbeats y marca sus réplicas como no disponibles. Mientras quede otra réplica válida, los clientes pueden leer el bloque desde otro nodo; por eso la caída de un DataNode no implica necesariamente la pérdida del archivo *[1]*.
+En un clúster de producción, HDFS divide los archivos en bloques y guarda varias réplicas de cada bloque en distintos DataNodes, normalmente procurando distribuirlas entre racks. Si un DataNode se apaga, el NameNode detecta que deja de responder mediante los heartbeats y marca sus réplicas como no disponibles. Mientras quede otra réplica válida, los clientes pueden leer el bloque desde otro nodo; por eso la caída de un DataNode no implica necesariamente la pérdida del archivo *[1]*.
 
-HDFS también verifica la integridad de los datos mediante checksums y puede detectar bloques dañados *[1]*, *[3]*. Si una réplica falla o queda por debajo del nivel configurado, el NameNode puede ordenar la replicación de bloques válidos hacia otros DataNodes *[1]*. El NameNode conserva los metadatos que relacionan archivos, bloques y ubicaciones; para proteger también la disponibilidad de esos metadatos, HDFS ofrece configuraciones de alta disponibilidad con NameNodes Active/Standby y failover *[2]*.
+HDFS también verifica la integridad de los datos mediante checksums y puede detectar bloques dañados *[3]*. Si una réplica falla o queda por debajo del nivel configurado, el NameNode puede ordenar la replicación de bloques válidos hacia otros DataNodes *[1]*. El NameNode conserva los metadatos que relacionan archivos, bloques y ubicaciones; para proteger también la disponibilidad de esos metadatos, HDFS ofrece configuraciones de alta disponibilidad con NameNodes Active/Standby y failover *[2]*.
 
-Este ejercicio usa un único DataNode y el factor de replicación es `1`, como muestra `fsck`. Por tanto, permite observar bloques y su ubicación, pero **no demuestra tolerancia a la pérdida de un DataNode**: si ese único nodo desapareciera, no habría otra réplica de los bloques. La redundancia descrita corresponde a un clúster de producción con varios nodos y un factor de replicación mayor que uno *[1]*.
+Este ejercicio usa un único DataNode y el factor de replicación es `1`, como muestra `fsck`. Por tanto, permite observar bloques y su ubicación, pero no demuestra tolerancia a la pérdida de un DataNode: si ese único nodo desapareciera, no habría otra réplica de los bloques. La redundancia descrita corresponde a un clúster de producción con varios nodos y un factor de replicación mayor que uno *[1]*.
 
 ## 4. Evidencias gráficas
 
