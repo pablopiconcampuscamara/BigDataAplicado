@@ -1,0 +1,3 @@
+id_transaccion,tienda,timestamp,categoria,importe_eur,unidades,metodo_pago,motivo_rechazo
+,Este_Valencia,2026-11-10 09:18:17,Electronica,102.4,1,Bizum,id_transaccion nulo
+,Este_Valencia,2026-11-10 14:04:56,Electronica,48.25,5,Tarjeta,id_transaccion nulo

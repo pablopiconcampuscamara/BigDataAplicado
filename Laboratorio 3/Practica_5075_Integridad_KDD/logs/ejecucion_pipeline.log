@@ -4,3 +4,48 @@
 2026-11-12 19:51:28,080 INFO VALIDO: transacciones_tienda_este.csv
 2026-11-12 19:51:28,081 INFO Manifiesto de cuarentena guardado en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\quarantine_manifest.txt
 2026-11-12 19:51:28,081 INFO Fin de verificación del lote
+2026-11-12 20:03:15,548 INFO Inicio de verificación del lote
+2026-11-12 20:03:15,549 INFO VALIDO: transacciones_tienda_norte.csv
+2026-11-12 20:03:15,554 WARNING RECHAZADO: transacciones_tienda_sur.csv (el hash no coincide)
+2026-11-12 20:03:15,554 INFO VALIDO: transacciones_tienda_este.csv
+2026-11-12 20:03:15,556 INFO Manifiesto de cuarentena guardado en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\quarantine_manifest.txt
+2026-11-12 20:03:15,557 INFO Fin de verificación del lote
+2026-11-12 20:05:51,055 INFO Inicio de inspección de datos
+2026-11-12 20:05:51,058 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:05:51,059 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:05:51,061 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:05:51,061 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:05:51,061 INFO Fin de inspección de datos
+2026-11-12 20:09:48,323 INFO Inicio de inspección de datos
+2026-11-12 20:09:48,324 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:09:48,325 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:09:48,326 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:09:48,326 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:09:48,330 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:09:48,331 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:09:48,331 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:09:48,331 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:09:48,332 INFO Tratamiento de nulos finalizado: 98 filas listas para las siguientes validaciones
+2026-11-12 20:09:48,332 INFO Filas sin identificador guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:10:12,234 INFO Inicio de inspección de datos
+2026-11-12 20:10:12,236 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:10:12,236 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:10:12,237 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:10:12,237 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:10:12,241 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:10:12,242 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:10:12,242 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:10:12,243 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:10:12,243 INFO Tratamiento de nulos finalizado: 98 filas listas para las siguientes validaciones
+2026-11-12 20:10:12,243 INFO Filas sin identificador guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv
+2026-11-12 20:11:05,260 INFO Inicio de inspección de datos
+2026-11-12 20:11:05,262 INFO transacciones_tienda_este.csv: 50 filas y 7 columnas
+2026-11-12 20:11:05,263 INFO transacciones_tienda_norte.csv: 50 filas y 7 columnas
+2026-11-12 20:11:05,265 INFO Lote conjunto: 100 filas y 7 columnas
+2026-11-12 20:11:05,265 INFO Valores nulos por columna: {'id_transaccion': 2, 'tienda': 0, 'timestamp': 0, 'categoria': 1, 'importe_eur': 1, 'unidades': 0, 'metodo_pago': 1}
+2026-11-12 20:11:05,270 WARNING Filas apartadas por id_transaccion nulo: 2
+2026-11-12 20:11:05,271 INFO Nulos de importe_eur imputados con la mediana: 72.99
+2026-11-12 20:11:05,272 INFO Nulos de categoria imputados con la moda: Textil
+2026-11-12 20:11:05,272 INFO Nulos de metodo_pago imputados con la moda: Transferencia
+2026-11-12 20:11:05,273 INFO Tratamiento de nulos finalizado: 98 filas listas para las siguientes validaciones
+2026-11-12 20:11:05,273 INFO Filas sin identificador guardadas en C:\Users\EXPERTO\Desktop\code\Laboratorio 3\Practica_5075_Integridad_KDD\output_samples\bad_records.csv

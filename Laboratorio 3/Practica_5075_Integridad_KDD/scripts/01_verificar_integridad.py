@@ -1,4 +1,5 @@
 import logging
+import shutil
 from hashlib import sha256
 from pathlib import Path
 
@@ -19,6 +20,9 @@ def verificar_lote(manifiesto: Path) -> None:
     """Compara cada archivo del manifiesto y registra los resultados."""
     # Los CSV están en la misma carpeta que el manifiesto.
     carpeta_datos = manifiesto.parent
+    proyecto = manifiesto.parents[2]
+    carpeta_verificados = proyecto / "staging" / "verified"
+    carpeta_verificados.mkdir(parents=True, exist_ok=True)
     archivos_verificados = 0
     rechazados = []
 
@@ -44,11 +48,17 @@ def verificar_lote(manifiesto: Path) -> None:
                 print(mensaje)
                 # INFO registra un resultado normal de la comprobación.
                 logging.info(mensaje)
+                # Copiamos solo los archivos aprobados para que la fase 2 use esta zona.
+                shutil.copy2(ruta_archivo, carpeta_verificados / nombre_archivo)
             else:
                 mensaje = f"RECHAZADO: {nombre_archivo} (el hash no coincide)"
                 print(mensaje)
                 # WARNING señala un problema que no detiene la verificación del lote.
                 logging.warning(mensaje)
+                # Si una ejecución anterior lo había aprobado, quitamos esa copia obsoleta.
+                copia_anterior = carpeta_verificados / nombre_archivo
+                if copia_anterior.exists():
+                    copia_anterior.unlink()
                 rechazados.append(
                     f"{nombre_archivo} | esperado: {hash_esperado} | obtenido: {hash_obtenido}"
                 )
@@ -57,7 +67,6 @@ def verificar_lote(manifiesto: Path) -> None:
         raise ValueError("El manifiesto no contiene archivos para verificar")
 
     # Guardamos solo el listado de rechazados; los CSV originales no se mueven.
-    proyecto = manifiesto.parents[2]
     carpeta_salida = proyecto / "output_samples"
     archivo_cuarentena = carpeta_salida / "quarantine_manifest.txt"
     contenido = "\n".join(rechazados)
